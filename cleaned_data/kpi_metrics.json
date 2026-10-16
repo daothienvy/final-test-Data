@@ -1,0 +1,325 @@
+{
+  "total_revenue": 30447872.89,
+  "total_orders": 89316,
+  "total_customers": 89316,
+  "aov": 340.900542903847,
+  "total_shipping": 3955199.17,
+  "shipping_cost_ratio": 12.990067267717103,
+  "total_delivered": 87427,
+  "ontime_count": 4378,
+  "ontime_rate": 5.007606345865693,
+  "cancelled_count": 409,
+  "cancellation_rate": 0.4579246719512741,
+  "avg_lead_time": 12.43453041696374,
+  "segment_standard_counts": {
+    "4. Lost / At-Risk": 73317,
+    "3. Potential Customer": 15999
+  },
+  "segment_enhanced_counts": {
+    "4. Lost / At-Risk": 58357,
+    "2. Loyal / High-Tier": 14341,
+    "3. Potential Customer": 11337,
+    "1. VIP Customer (High Value)": 5281
+  },
+  "delivery_tier_summary": {
+    "3. Delayed (>3 Days)": 83049,
+    "2. Standard (1-3 Days)": 4378,
+    "Not Shipped / Cancelled": 1889
+  },
+  "monthly_trend": [
+    {
+      "month_year": "2016-09",
+      "revenue": 944.56,
+      "orders": 3,
+      "shipping": 181.07999999999998
+    },
+    {
+      "month_year": "2016-10",
+      "revenue": 96038.16,
+      "orders": 289,
+      "shipping": 13801.85
+    },
+    {
+      "month_year": "2016-12",
+      "revenue": 215.94,
+      "orders": 1,
+      "shipping": 61.32
+    },
+    {
+      "month_year": "2017-01",
+      "revenue": 242128.16999999998,
+      "orders": 857,
+      "shipping": 39449.57
+    },
+    {
+      "month_year": "2017-02",
+      "revenue": 446158.45,
+      "orders": 1534,
+      "shipping": 71540.42
+    },
+    {
+      "month_year": "2017-03",
+      "revenue": 826478.58,
+      "orders": 2392,
+      "shipping": 115555.72
+    },
+    {
+      "month_year": "2017-04",
+      "revenue": 736335.08,
+      "orders": 2156,
+      "shipping": 98195.39
+    },
+    {
+      "month_year": "2017-05",
+      "revenue": 1028211.53,
+      "orders": 3407,
+      "shipping": 157438.44
+    },
+    {
+      "month_year": "2017-06",
+      "revenue": 915599.54,
+      "orders": 2953,
+      "shipping": 129563.38
+    },
+    {
+      "month_year": "2017-07",
+      "revenue": 1217621.46,
+      "orders": 3781,
+      "shipping": 169966.78
+    },
+    {
+      "month_year": "2017-08",
+      "revenue": 1271253.67,
+      "orders": 4028,
+      "shipping": 179316.22
+    },
+    {
+      "month_year": "2017-09",
+      "revenue": 1432583.39,
+      "orders": 3937,
+      "shipping": 172305.75
+    },
+    {
+      "month_year": "2017-10",
+      "revenue": 1430263.65,
+      "orders": 4258,
+      "shipping": 191607.57
+    },
+    {
+      "month_year": "2017-11",
+      "revenue": 2848052.62,
+      "orders": 6840,
+      "shipping": 308414.57
+    },
+    {
+      "month_year": "2017-12",
+      "revenue": 1792221.66,
+      "orders": 4981,
+      "shipping": 216720.04
+    },
+    {
+      "month_year": "2018-01",
+      "revenue": 2035920.92,
+      "orders": 6463,
+      "shipping": 277195.84
+    },
+    {
+      "month_year": "2018-02",
+      "revenue": 2004865.64,
+      "orders": 6069,
+      "shipping": 271178.76
+    },
+    {
+      "month_year": "2018-03",
+      "revenue": 2340055.36,
+      "orders": 6508,
+      "shipping": 276818.33
+    },
+    {
+      "month_year": "2018-04",
+      "revenue": 2199653.2399999998,
+      "orders": 6200,
+      "shipping": 259404.55
+    },
+    {
+      "month_year": "2018-05",
+      "revenue": 2388603.88,
+      "orders": 6163,
+      "shipping": 262770.2
+    },
+    {
+      "month_year": "2018-06",
+      "revenue": 1734187.77,
+      "orders": 5510,
+      "shipping": 238634.42
+    },
+    {
+      "month_year": "2018-07",
+      "revenue": 1761504.83,
+      "orders": 5430,
+      "shipping": 246732.45
+    },
+    {
+      "month_year": "2018-08",
+      "revenue": 1698819.39,
+      "orders": 5555,
+      "shipping": 258266.18
+    },
+    {
+      "month_year": "2018-09",
+      "revenue": 155.4,
+      "orders": 1,
+      "shipping": 80.34
+    }
+  ],
+  "cat_summary_top10": [
+    {
+      "product_category_name": "toys",
+      "revenue": 22994700.31,
+      "orders": 67027,
+      "avg_shipping": 44.556429647753895
+    },
+    {
+      "product_category_name": "furniture_decor",
+      "revenue": 753073.49,
+      "orders": 1760,
+      "avg_shipping": 44.884488636363635
+    },
+    {
+      "product_category_name": "garden_tools",
+      "revenue": 746590.63,
+      "orders": 807,
+      "avg_shipping": 41.83949194547708
+    },
+    {
+      "product_category_name": "bed_bath_table",
+      "revenue": 604534.89,
+      "orders": 2146,
+      "avg_shipping": 44.352651444547995
+    },
+    {
+      "product_category_name": "health_beauty",
+      "revenue": 596724.24,
+      "orders": 2351,
+      "avg_shipping": 42.8644193960017
+    },
+    {
+      "product_category_name": "watches_gifts",
+      "revenue": 584225.46,
+      "orders": 1196,
+      "avg_shipping": 43.54274247491639
+    },
+    {
+      "product_category_name": "sports_leisure",
+      "revenue": 547922.16,
+      "orders": 1837,
+      "avg_shipping": 42.59707675557975
+    },
+    {
+      "product_category_name": "telephony",
+      "revenue": 494999.59,
+      "orders": 912,
+      "avg_shipping": 38.42072368421052
+    },
+    {
+      "product_category_name": "computers_accessories",
+      "revenue": 430532.98,
+      "orders": 1715,
+      "avg_shipping": 42.98447230320699
+    },
+    {
+      "product_category_name": "housewares",
+      "revenue": 415090.22,
+      "orders": 1340,
+      "avg_shipping": 44.038738805970155
+    }
+  ],
+  "state_summary_top10": [
+    {
+      "customer_state": "SP",
+      "revenue": 12937888.77,
+      "orders": 37879,
+      "ontime_rate": 10.116423348029251
+    },
+    {
+      "customer_state": "RJ",
+      "revenue": 3851780.34,
+      "orders": 11578,
+      "ontime_rate": 1.7446882017619625
+    },
+    {
+      "customer_state": "MG",
+      "revenue": 3502549.88,
+      "orders": 10334,
+      "ontime_rate": 1.4321656667311786
+    },
+    {
+      "customer_state": "RS",
+      "revenue": 1661276.59,
+      "orders": 4921,
+      "ontime_rate": 0.6096321885795569
+    },
+    {
+      "customer_state": "PR",
+      "revenue": 1607270.1,
+      "orders": 4523,
+      "ontime_rate": 1.8792836612867565
+    },
+    {
+      "customer_state": "SC",
+      "revenue": 1067002.54,
+      "orders": 3213,
+      "ontime_rate": 0.9959539371304078
+    },
+    {
+      "customer_state": "BA",
+      "revenue": 1061022.26,
+      "orders": 3088,
+      "ontime_rate": 0.2914507772020725
+    },
+    {
+      "customer_state": "GO",
+      "revenue": 684457.77,
+      "orders": 1868,
+      "ontime_rate": 0.4817987152034261
+    },
+    {
+      "customer_state": "ES",
+      "revenue": 616957.9,
+      "orders": 1798,
+      "ontime_rate": 0.16685205784204674
+    },
+    {
+      "customer_state": "DF",
+      "revenue": 566769.16,
+      "orders": 1793,
+      "ontime_rate": 1.1154489682097044
+    }
+  ],
+  "payment_summary": [
+    {
+      "payment_type": "credit_card",
+      "revenue": 22121662.49,
+      "orders": 65814,
+      "aov": 336.12396283465523
+    },
+    {
+      "payment_type": "wallet",
+      "revenue": 6188898.22,
+      "orders": 17302,
+      "aov": 357.69842908334294
+    },
+    {
+      "payment_type": "voucher",
+      "revenue": 1715758.6,
+      "orders": 4911,
+      "aov": 349.37051517002647
+    },
+    {
+      "payment_type": "debit_card",
+      "revenue": 421553.58,
+      "orders": 1289,
+      "aov": 327.03923972071374
+    }
+  ]
+}

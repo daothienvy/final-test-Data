@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Temporary / Scratch files
+public_url.txt
+doc_full.txt
+__pycache__/
+*.py[cod]
+
+# System logs
+*.log

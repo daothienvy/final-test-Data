@@ -1,0 +1,259 @@
+/*
+========================================================================================
+THƯ VIỆN CÔNG THỨC DAX TOÀN DIỆN (FULL DAX MEASURES & CALCULATED COLUMNS LIBRARY)
+ĐỀ TÀI: PHÂN TÍCH KINH DOANH THƯƠNG MẠI ĐIỆN TỬ VÀ HIỆU QUẢ CHUỖI CUNG ỨNG
+Áp dụng trên mô hình Star Schema: Fact_Orders, Dim_Customers, Dim_Products, Dim_Date, Dim_Payments
+========================================================================================
+*/
+
+// ======================================================================================
+// PHẦN 1: CỘT TÍNH TOÁN (CALCULATED COLUMNS) TRONG FACT_ORDERS & DIMENSIONS
+// ======================================================================================
+
+/*
+1. Cột Phân loại Thời gian Giao hàng (Delivery Lead Time Tier)
+Bảng: Fact_Orders
+Mục tiêu: Đánh giá phân lớp thời gian xử lý và giao hàng cam kết chặng cuối.
+*/
+Delivery Lead Time Tier = 
+VAR LeadTime = DATEDIFF(Fact_Orders[order_date], Fact_Orders[ship_date], DAY)
+RETURN
+SWITCH(
+    TRUE(),
+    ISBLANK(Fact_Orders[ship_date]), "Not Shipped / Cancelled",
+    LeadTime <= 0, "1. Same Day / Express",
+    LeadTime <= 3, "2. Standard (1-3 Days)",
+    "3. Delayed (>3 Days)"
+)
+
+/*
+2. Cột Phân loại Giá trị Giỏ hàng (Order Basket Value Tier)
+Bảng: Fact_Orders
+Mục tiêu: Phân loại quy mô đơn hàng phục vụ chiến lược Upsell & chính sách Freeship.
+*/
+Order Value Tier = 
+SWITCH(
+    TRUE(),
+    Fact_Orders[sales] < 50, "Low Value (<$50)",
+    Fact_Orders[sales] <= 200, "Medium Value ($50-$200)",
+    "High Value (>$200)"
+)
+
+/*
+3. Cột Phân loại Khách hàng Chuẩn theo Đề bài (Customer Segment - Standard)
+Bảng: Fact_Orders (hoặc Dim_Customers)
+Mục tiêu: Tuân thủ 100% barem chấm điểm theo công thức gốc trong tài liệu hướng dẫn.
+*/
+Customer Segment = 
+VAR CustID = Fact_Orders[customer_id]
+VAR MaxOrderDate = CALCULATE(MAX(Fact_Orders[order_date]), ALLEXCEPT(Fact_Orders, Fact_Orders[customer_id]))
+VAR SnapshotDate = CALCULATE(MAX(Fact_Orders[order_date]), ALL(Fact_Orders))
+VAR RecencyDays = DATEDIFF(MaxOrderDate, SnapshotDate, DAY)
+VAR TotalOrders = CALCULATE(COUNTROWS(Fact_Orders), ALLEXCEPT(Fact_Orders, Fact_Orders[customer_id]))
+VAR TotalSpend = CALCULATE(SUM(Fact_Orders[sales]), ALLEXCEPT(Fact_Orders, Fact_Orders[customer_id]))
+RETURN
+SWITCH(
+    TRUE(),
+    RecencyDays > 90, "4. Lost / At-Risk",
+    TotalSpend >= 1000 && TotalOrders >= 5, "1. VIP Customer",
+    TotalOrders >= 3, "2. Loyal Customer",
+    "3. Potential Customer"
+)
+
+/*
+4. Cột Phân loại Khách hàng Nâng cao (Customer Segment - Enhanced / Value-Adjusted)
+Bảng: Fact_Orders (hoặc Dim_Customers)
+Mục tiêu: Nhận diện khách hàng giá trị cao (Monetary High-Value) khi tập dữ liệu có tỷ lệ đơn lẻ lớn.
+*/
+Customer Segment Enhanced = 
+VAR CustID = Fact_Orders[customer_id]
+VAR MaxOrderDate = CALCULATE(MAX(Fact_Orders[order_date]), ALLEXCEPT(Fact_Orders, Fact_Orders[customer_id]))
+VAR SnapshotDate = CALCULATE(MAX(Fact_Orders[order_date]), ALL(Fact_Orders))
+VAR RecencyDays = DATEDIFF(MaxOrderDate, SnapshotDate, DAY)
+VAR TotalSpend = CALCULATE(SUM(Fact_Orders[sales]), ALLEXCEPT(Fact_Orders, Fact_Orders[customer_id]))
+RETURN
+SWITCH(
+    TRUE(),
+    RecencyDays > 90 && TotalSpend < 500, "4. Lost / At-Risk",
+    TotalSpend >= 1000, "1. VIP High-Value Customer",
+    TotalSpend >= 300, "2. Loyal / High-Tier Customer",
+    "3. Potential Customer"
+)
+
+/*
+5. Cột Phân loại Tỷ lệ Chi phí Logistics (Logistics Cost Tier)
+Bảng: Fact_Orders
+Mục tiêu: Cảnh báo đơn hàng bị xói mòn lợi nhuận do chi phí vận chuyển vượt ngưỡng an toàn.
+*/
+Logistics Cost Tier = 
+VAR ShippingRatio = DIVIDE(Fact_Orders[shipping_charge], Fact_Orders[sales], 0)
+RETURN
+SWITCH(
+    TRUE(),
+    ShippingRatio < 0.08, "Optimal Cost (<8%)",
+    ShippingRatio <= 0.15, "Moderate Cost (8%-15%)",
+    "High Cost / Profit Erosion (>15%)"
+)
+
+
+// ======================================================================================
+// PHẦN 2: HỆ THỐNG MEASURES CỐT LÕI (CORE MEASURES LIBRARY - BẢNG _MEASURES)
+// ======================================================================================
+
+// --- 2.1 TRỤ CỘT 1: SALES & REVENUE PERFORMANCE ---
+
+// 1. Tổng Doanh thu (Total Revenue)
+Total Revenue = SUM(Fact_Orders[sales])
+
+// 2. Tổng Số Đơn hàng (Total Orders)
+Total Orders = COUNTROWS(Fact_Orders)
+
+// 3. Giá trị Đơn hàng Trung bình (Average Order Value - AOV)
+Average Order Value = DIVIDE([Total Revenue], [Total Orders], 0)
+
+// 4. Doanh thu Tháng trước (Revenue Last Month - MoM Support)
+Revenue LM = CALCULATE([Total Revenue], DATEADD(Dim_Date[full_date], -1, MONTH))
+
+// 5. Tăng trưởng Doanh thu theo Tháng (Sales Growth MoM %)
+Sales Growth MoM % = 
+VAR PrevRev = [Revenue LM]
+RETURN
+IF(
+    ISBLANK(PrevRev) || PrevRev == 0,
+    BLANK(),
+    DIVIDE([Total Revenue] - PrevRev, PrevRev, 0)
+)
+
+// 6. Doanh thu Cùng kỳ Năm trước (Revenue Last Year - YoY Support)
+Revenue SPLY = CALCULATE([Total Revenue], SAMEPERIODLASTYEAR(Dim_Date[full_date]))
+
+// 7. Tăng trưởng Doanh thu theo Năm (Sales Growth YoY %)
+Sales Growth YoY % = 
+VAR PrevYearRev = [Revenue SPLY]
+RETURN
+IF(
+    ISBLANK(PrevYearRev) || PrevYearRev == 0,
+    BLANK(),
+    DIVIDE([Total Revenue] - PrevYearRev, PrevYearRev, 0)
+)
+
+// 8. Doanh thu Lũy kế Từ Đầu Năm (YTD Revenue)
+Revenue YTD = TOTALYTD([Total Revenue], Dim_Date[full_date])
+
+
+// --- 2.2 TRỤ CỘT 2: CUSTOMER BEHAVIOR & RETENTION ---
+
+// 9. Tổng Số lượng Khách hàng Duy nhất (Total Customers)
+Total Customers = DISTINCTCOUNT(Fact_Orders[customer_id])
+
+// 10. Tỷ lệ Khách hàng Mua lại (Repeat Purchase Rate %) - Chuẩn Đề bài
+Repeat Purchase Rate % = 
+VAR RepeatCust = 
+    COUNTROWS(
+        FILTER(
+            SUMMARIZE(Fact_Orders, Fact_Orders[customer_id], "OrderCount", COUNTROWS(Fact_Orders)),
+            [OrderCount] > 1
+        )
+    )
+RETURN 
+DIVIDE(RepeatCust, [Total Customers], 0)
+
+// 11. Số lượng Khách hàng VIP Chuẩn (VIP Customer Count)
+VIP Customer Count = 
+COUNTROWS(
+    FILTER(
+        VALUES(Fact_Orders[customer_id]),
+        CALCULATE(MAX(Fact_Orders[customer_segment])) = "1. VIP Customer"
+    )
+)
+
+// 12. Tỷ trọng Doanh thu Nhóm VIP (VIP Revenue Share %)
+VIP Revenue Share % = 
+VAR VIPRev = CALCULATE([Total Revenue], Fact_Orders[customer_segment] = "1. VIP Customer")
+RETURN DIVIDE(VIPRev, [Total Revenue], 0)
+
+// 13. Số lượng Khách hàng Nguy cơ / Rời bỏ (Lost Customer Count)
+Lost Customer Count = 
+COUNTROWS(
+    FILTER(
+        VALUES(Fact_Orders[customer_id]),
+        CALCULATE(MAX(Fact_Orders[customer_segment])) = "4. Lost / At-Risk"
+    )
+)
+
+// 14. Số lượng Khách hàng VIP Nâng cao (VIP Customer Count - Enhanced)
+VIP Customer Count Enhanced = 
+COUNTROWS(
+    FILTER(
+        VALUES(Fact_Orders[customer_id]),
+        CALCULATE(MAX(Fact_Orders[customer_segment_enhanced])) = "1. VIP Customer (High Value)"
+    )
+)
+
+// 15. Doanh thu Trung bình Trên Mỗi Khách hàng (Revenue Per Customer - ARPU)
+Revenue Per Customer = DIVIDE([Total Revenue], [Total Customers], 0)
+
+
+// --- 2.3 TRỤ CỘT 3: SUPPLY CHAIN & LAST-MILE LOGISTICS ---
+
+// 16. Tổng Chi phí Vận chuyển (Total Shipping Cost)
+Total Shipping Cost = SUM(Fact_Orders[shipping_charge])
+
+// 17. Tỷ lệ Chi phí Vận chuyển trên Doanh thu (Shipping Cost Ratio %)
+Shipping Cost Ratio % = DIVIDE([Total Shipping Cost], [Total Revenue], 0)
+
+// 18. Tổng Số Đơn hàng Đã Giao Thành Công (Total Delivered Orders)
+Total Delivered Orders = CALCULATE([Total Orders], NOT(ISBLANK(Fact_Orders[ship_date])))
+
+// 19. Số Đơn Giao Đúng Hạn (On-Time Orders)
+On-Time Orders = 
+CALCULATE(
+    [Total Orders],
+    Fact_Orders[delivery_performance_tier] IN {"1. Same Day / Express", "2. Standard (1-3 Days)"}
+)
+
+// 20. Tỷ lệ Giao hàng Đúng hạn (On-Time Delivery Rate %) - Chuẩn Đề bài
+On-Time Delivery Rate % = 
+VAR DeliveredOrders = [Total Delivered Orders]
+VAR OnTime = [On-Time Orders]
+RETURN DIVIDE(OnTime, DeliveredOrders, 0)
+
+// 21. Thời gian Xử lý & Giao hàng Trung bình (Avg Delivery Lead Time)
+Avg Delivery Lead Time = 
+CALCULATE(
+    AVERAGE(Fact_Orders[delivery_lead_time_days]),
+    NOT(ISBLANK(Fact_Orders[ship_date]))
+)
+
+// 22. Số Đơn Bị Hủy (Cancelled Orders)
+Cancelled Orders = CALCULATE([Total Orders], LOWER(Fact_Orders[order_status]) = "canceled")
+
+// 23. Tỷ lệ Hủy đơn hàng (Cancellation Rate %)
+Cancellation Rate % = DIVIDE([Cancelled Orders], [Total Orders], 0)
+
+// 24. Chi phí Vận chuyển Trung bình Trên Mỗi Đơn (Avg Shipping Per Order)
+Avg Shipping Per Order = DIVIDE([Total Shipping Cost], [Total Orders], 0)
+
+
+// --- 2.4 TRỤ CỘT 4: ACTION CENTER & ADVANCED FILTERING ---
+
+// 25. Số Đơn Trễ Hạn Cần Can Thiệp Khẩn Cấp (Critical Delayed Orders)
+Critical Delayed Orders = 
+CALCULATE(
+    [Total Orders],
+    Fact_Orders[delivery_performance_tier] = "3. Delayed (>3 Days)",
+    Fact_Orders[order_status] IN {"delivered", "shipped"}
+)
+
+// 26. Doanh thu Rủi ro từ Khách hàng Rời bỏ (At-Risk Revenue Pool)
+At-Risk Revenue Pool = 
+CALCULATE([Total Revenue], Fact_Orders[customer_segment] = "4. Lost / At-Risk")
+
+// 27. Chỉ số Cảnh báo Vận hành (Operational Risk Flag)
+Operational Risk Status = 
+SWITCH(
+    TRUE(),
+    [On-Time Delivery Rate %] < 0.85, "ALERT: Low On-Time Rate",
+    [Shipping Cost Ratio %] > 0.15, "WARNING: Profit Erosion",
+    "NORMAL"
+)

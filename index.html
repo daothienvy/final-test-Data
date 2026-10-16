@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power BI Executive Dashboard - E-Commerce & Supply Chain</title>
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Chart.js via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+  <!-- Top Dashboard Header -->
+  <header class="dashboard-header" id="main-header">
+    <div class="brand-wrapper">
+      <div class="brand-icon">📊</div>
+      <div class="brand-text">
+        <h1>POWER BI EXECUTIVE PORTAL <span class="brand-badge">CAPSTONE EDITION</span></h1>
+        <p>Phân tích Hiệu quả Kinh doanh Thương mại Điện tử và Vận hành Chuỗi Cung ứng (2016 - 2018)</p>
+      </div>
+    </div>
+    <div class="header-meta">
+      <div class="meta-pill" id="meta-dataset-info">
+        <span>📦</span> <strong>89,316 Đơn hàng</strong>
+      </div>
+      <div class="meta-pill" id="meta-schema-info">
+        <span>⭐</span> <strong>Star Schema Active</strong>
+      </div>
+      <button class="btn-export" id="btn-export-report" onclick="window.print()">
+        <span>🖨️</span> Xuất Báo cáo PDF
+      </button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs & Slicer Controls -->
+  <nav class="nav-slicer-container" id="nav-container">
+    <div class="page-tabs" id="page-tabs">
+      <button class="tab-btn active" id="tab-p1" onclick="switchTab('page1')">
+        <span>📈</span> Trang 1: Sales & Revenue Overview
+      </button>
+      <button class="tab-btn" id="tab-p2" onclick="switchTab('page2')">
+        <span>👥</span> Trang 2: Customer Segmentation
+      </button>
+      <button class="tab-btn" id="tab-p3" onclick="switchTab('page3')">
+        <span>🚚</span> Trang 3: Supply Chain & Logistics
+      </button>
+      <button class="tab-btn" id="tab-p4" onclick="switchTab('page4')">
+        <span>🎯</span> Trang 4: Forecasting & Action Center
+      </button>
+    </div>
+
+    <!-- Global Slicers -->
+    <div class="slicers-bar" id="slicers-bar">
+      <span class="slicer-label">Bộ lọc (Slicers):</span>
+      <select class="slicer-select" id="slicer-state" onchange="applyFilters()">
+        <option value="ALL">Toàn quốc (All States)</option>
+        <option value="SP">SP - São Paulo (42.5%)</option>
+        <option value="RJ">RJ - Rio de Janeiro (12.7%)</option>
+        <option value="MG">MG - Minas Gerais (11.5%)</option>
+        <option value="RS">RS - Rio Grande do Sul (5.5%)</option>
+        <option value="PR">PR - Paraná (5.3%)</option>
+        <option value="BA">BA - Bahia (3.5%)</option>
+      </select>
+
+      <select class="slicer-select" id="slicer-category" onchange="applyFilters()">
+        <option value="ALL">Tất cả Ngành hàng (All Categories)</option>
+        <option value="toys">toys (Đồ chơi - 75.5%)</option>
+        <option value="furniture_decor">furniture_decor (Nội thất)</option>
+        <option value="garden_tools">garden_tools (Làm vườn)</option>
+        <option value="bed_bath_table">bed_bath_table (Gia dụng vải)</option>
+        <option value="health_beauty">health_beauty (Mỹ phẩm)</option>
+        <option value="computers_accessories">computers_accessories (Máy tính)</option>
+      </select>
+
+      <select class="slicer-select" id="slicer-model-view" onchange="toggleCustomerModel()">
+        <option value="ENHANCED">Phân khúc Nâng cao (Monetary High-Value)</option>
+        <option value="STANDARD">Phân khúc Chuẩn Đề bài (Standard DAX)</option>
+      </select>
+    </div>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="dashboard-content" id="main-content">
+
+    <!-- ========================================================================= -->
+    <!-- TRANG 1: EXECUTIVE SALES & REVENUE OVERVIEW -->
+    <!-- ========================================================================= -->
+    <section class="page-view active" id="page1">
+      <!-- KPI Top Cards -->
+      <div class="kpi-cards-grid">
+        <div class="kpi-card positive" id="card-p1-rev">
+          <div class="kpi-header">
+            <span class="kpi-title">Tổng Doanh thu (Total Revenue)</span>
+            <div class="kpi-icon">💰</div>
+          </div>
+          <div class="kpi-value" id="kpi-p1-rev-val">$30.45M</div>
+          <div class="kpi-subtitle">
+            <span class="badge-tag badge-positive">▲ +24.8% YoY</span> so với cùng kỳ
+          </div>
+        </div>
+
+        <div class="kpi-card" id="card-p1-orders">
+          <div class="kpi-header">
+            <span class="kpi-title">Tổng Số Đơn hàng (Total Orders)</span>
+            <div class="kpi-icon">🛒</div>
+          </div>
+          <div class="kpi-value" id="kpi-p1-orders-val">89,316</div>
+          <div class="kpi-subtitle">
+            <span class="badge-tag badge-positive">87,427 giao thành công</span> (97.9%)
+          </div>
+        </div>
+
+        <div class="kpi-card accent" id="card-p1-aov">
+          <div class="kpi-header">
+            <span class="kpi-title">Giá trị Giỏ hàng (Average Order Value)</span>
+            <div class="kpi-icon">🏷️</div>
+          </div>
+          <div class="kpi-value" id="kpi-p1-aov-val">$340.90</div>
+          <div class="kpi-subtitle">
+            <span class="badge-tag badge-warning">54.7% đơn > $200</span> (High Value)
+          </div>
+        </div>
+
+        <div class="kpi-card alert" id="card-p1-shipping">
+          <div class="kpi-header">
+            <span class="kpi-title">Tỷ lệ Cước Logistics (Shipping Ratio)</span>
+            <div class="kpi-icon">📦</div>
+          </div>
+          <div class="kpi-value" id="kpi-p1-shipping-val">12.99%</div>
+          <div class="kpi-subtitle">
+            <span class="badge-tag badge-alert">$3.96M cước vận chuyển</span> (Vượt ngưỡng 8%)
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row 1: Line & Clustered Column (Revenue & AOV Trend) + Donut Category Share -->
+      <div class="charts-grid-2col">
+        <div class="chart-box" id="box-p1-trend">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">📈 Diễn biến Doanh thu & AOV theo Tháng (Revenue & AOV Trend)</div>
+              <div class="chart-desc">Cột: Doanh thu theo tháng ($) | Đường: Giá trị đơn hàng trung bình AOV ($)</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-p1-trend"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-box" id="box-p1-donut">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">🍩 Tỷ trọng Doanh thu theo Ngành hàng</div>
+              <div class="chart-desc">Cơ cấu danh mục đóng góp doanh thu lớn nhất</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-p1-donut"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row 2: Top 10 Horizontal Bar + Matrix Table -->
+      <div class="charts-grid-equal">
+        <div class="chart-box" id="box-p1-topcat">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">📊 Top 10 Danh mục Sản phẩm Doanh thu Cao nhất</div>
+              <div class="chart-desc">So sánh quy mô doanh thu các nhóm hàng sinh lời chủ lực</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-p1-topcat"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-box" id="box-p1-matrix">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">📑 Ma trận Doanh thu theo Phương thức & Khu vực</div>
+              <div class="chart-desc">Tổng hợp Doanh thu ($) và AOV theo Payment Type</div>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="dashboard-table" id="table-p1-payment">
+              <thead>
+                <tr>
+                  <th>Phương thức Thanh toán</th>
+                  <th>Số Đơn hàng</th>
+                  <th>Tổng Doanh thu ($)</th>
+                  <th>Tỷ trọng (%)</th>
+                  <th>AOV ($)</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-p1-payment">
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TRANG 2: CUSTOMER BEHAVIOR & LOYALTY SEGMENTATION -->
+    <!-- ========================================================================= -->
+    <section class="page-view" id="page2">
+      <!-- KPI Top Cards -->
+      <div class="kpi-cards-grid">
+        <div class="kpi-card" id="card-p2-cust">
+          <div class="kpi-header">
+            <span class="kpi-title">Tổng Khách hàng (Total Customers)</span>
+            <div class="kpi-icon">👤</div>
+          </div>
+          <div class="kpi-value" id="kpi-p2-cust-val">89,316</div>
+          <div class="kpi-subtitle">
+            <span class="badge-tag badge-positive">100% tài khoản đã định danh</span>
+          </div>
+        </div>
+
+        <div class="kpi-card alert" id="card-p2-repeat">
+          <div class="kpi-header">
+            <span class="kpi-title">Tỷ lệ Mua lại (Repeat Purchase Rate)</span>
+            <div class="kpi-icon">🔄</div>
+          </div>
+          <div class="kpi-value" id="kpi-p2-repeat-val">0.00%</div>
+          <div class="kpi-subtitle">
+            <span class="badge-tag badge-alert">Đặc tính dữ liệu Single-order</span> tokenization
+          </div>
+        </div>
+
+        <div class="kpi-card positive" id="card-p2-vip">
+          <div class="kpi-header">
+            <span class="kpi-title">Khách hàng VIP (VIP Customer Count)</span>
+            <div class="kpi-icon">⭐</div>
+          </div>
+          <div class="kpi-value" id="kpi-p2-vip-val">5,281</div>
+          <div class="kpi-subtitle" id="kpi-p2-vip-sub">
+            <span class="badge-tag badge-positive">Đóng góp 26.7% doanh thu</span> (Chi tiêu > $1k)
+          </div>
+        </div>
+
+        <div class="kpi-card alert" id="card-p2-lost">
+          <div class="kpi-header">
+            <span class="kpi-title">Khách hàng Rời bỏ (Lost / At-Risk)</span>
+            <div class="kpi-icon">⚠️</div>
+          </div>
+          <div class="kpi-value" id="kpi-p2-lost-val">58,357</div>
+          <div class="kpi-subtitle" id="kpi-p2-lost-sub">
+            <span class="badge-tag badge-alert">Recency > 90 ngày</span> (Cần kích hoạt Win-back)
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row 1: Donut Segmentation + Bar Spend by Segment -->
+      <div class="charts-grid-equal">
+        <div class="chart-box" id="box-p2-seg-donut">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">🎯 Tỷ lệ Phân bổ Phân khúc Khách hàng</div>
+              <div class="chart-desc" id="desc-p2-seg">Mô hình Phân loại Giá trị Tích lũy (Enhanced Monetary Model)</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-p2-seg-donut"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-box" id="box-p2-seg-spend">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">💵 Doanh thu Trung bình theo Phân khúc (Average Spend)</div>
+              <div class="chart-desc">So sánh mức chi tiêu bình quân trên một khách hàng</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-p2-seg-spend"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row 2: Geographic Distribution by State & Segment -->
+      <div class="charts-grid-2col">
+        <div class="chart-box" id="box-p2-geo">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">🗺️ Phân bổ Doanh thu & Khách hàng theo Bang (Top 10 States)</div>
+              <div class="chart-desc">Thị phần doanh thu tập trung tại các bang trọng điểm</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-p2-geo"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-box" id="box-p2-recency-box">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">⏱️ Trạng thái Hoạt động theo Recency</div>
+              <div class="chart-desc">Phân loại vòng đời khách hàng từ lần mua cuối</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-p2-recency"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TRANG 3: SUPPLY CHAIN & LAST-MILE LOGISTICS OPERATIONS -->
+    <!-- ========================================================================= -->
+    <section class="page-view" id="page3">
+      <!-- KPI Top Cards -->
+      <div class="kpi-cards-grid">
+        <div class="kpi-card alert" id="card-p3-ontime">
+          <div class="kpi-header">
+            <span class="kpi-title">Tỷ lệ Giao Đúng Hạn (On-Time Delivery Rate)</span>
+            <div class="kpi-icon">⏱️</div>
+          </div>
+          <div class="kpi-value" id="kpi-p3-ontime-val">5.01%</div>
+          <div class="kpi-subtitle">
+            <span class="badge-tag badge-alert">Tiêu chuẩn giao nhanh ≤ 3 ngày</span> (Mục tiêu > 90%)
+          </div>
+        </div>
+
+        <div class="kpi-card alert" id="card-p3-lead">
+          <div class="kpi-header">
+            <span class="kpi-title">Thời gian Giao TB (Avg Delivery Lead Time)</span>
+            <div class="kpi-icon">🚚</div>
+          </div>
+          <div class="kpi-value" id="kpi-p3-lead-val">12.43 Ngày</div>
+          <div class="kpi-subtitle">
+            <span class="badge-tag badge-alert">Khoảng cách địa lý rộng</span> (SP 8.7 ngày vs BA 19.3 ngày)
+          </div>
+        </div>
+
+        <div class="kpi-card positive" id="card-p3-cancel">
+          <div class="kpi-header">
+            <span class="kpi-title">Tỷ lệ Hủy Đơn (Cancellation Rate)</span>
+            <div class="kpi-icon">🛡️</div>
+          </div>
+          <div class="kpi-value" id="kpi-p3-cancel-val">0.46%</div>
+          <div class="kpi-subtitle">
+            <span class="badge-tag badge-positive">Rất thấp</span> (Chỉ 409 đơn hủy / 89,316 đơn)
+          </div>
+        </div>
+
+        <div class="kpi-card accent" id="card-p3-shipping-tot">
+          <div class="kpi-header">
+            <span class="kpi-title">Tổng Chi phí Vận chuyển (Shipping Cost)</span>
+            <div class="kpi-icon">💸</div>
+          </div>
+          <div class="kpi-value" id="kpi-p3-shipping-tot-val">$3.96M</div>
+          <div class="kpi-subtitle">
+            <span class="badge-tag badge-warning">Cước TB: $44.28 / đơn</span> (Chiếm 12.99% Sales)
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row 1: Delivery Lead Time Tier + Shipping Ratio by Category -->
+      <div class="charts-grid-equal">
+        <div class="chart-box" id="box-p3-lead-tier">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">📊 Cơ cấu Phân loại Thời gian Giao hàng (Delivery Performance Tier)</div>
+              <div class="chart-desc">Phân bố số lượng đơn hàng theo dải Lead Time cam kết</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-p3-lead-tier"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-box" id="box-p3-cat-ship-ratio">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">⚠️ Tỷ lệ Cước Phí / Doanh thu theo Ngành hàng (Shipping Ratio %)</div>
+              <div class="chart-desc">Cảnh báo rò rỉ lợi nhuận (Ngưỡng an toàn < 8% màu xanh, > 15% màu đỏ)</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-p3-cat-ship-ratio"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row 2: State Lead Time Matrix Heatmap + Weight Class Stacked -->
+      <div class="charts-grid-equal">
+        <div class="chart-box" id="box-p3-state-lead">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">🗺️ Thời gian Giao hàng Trung bình & Điểm nghẽn Vận tải theo Bang</div>
+              <div class="chart-desc">Top 10 Bang tiêu thụ lớn nhất (Lead Time tính bằng Ngày)</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-p3-state-lead"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-box" id="box-p3-weight">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">⚖️ Tác động của Khối lượng Hàng hóa (Weight Class Impact)</div>
+              <div class="chart-desc">So sánh Khối lượng gói hàng vs Phí vận chuyển và Lead Time</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-p3-weight"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TRANG 4: DEMAND FORECASTING & EXECUTIVE ACTION CENTER -->
+    <!-- ========================================================================= -->
+    <section class="page-view" id="page4">
+      <!-- KPI Top Cards -->
+      <div class="kpi-cards-grid">
+        <div class="kpi-card positive" id="card-p4-fc-q4">
+          <div class="kpi-header">
+            <span class="kpi-title">Dự báo Doanh thu Q4/2018 (AI Forecast)</span>
+            <div class="kpi-icon">🤖</div>
+          </div>
+          <div class="kpi-value" id="kpi-p4-fc-q4-val">$6.17M</div>
+          <div class="kpi-subtitle">
+            <span class="badge-tag badge-positive">▲ +38.5% QoQ</span> (Tăng tốc mùa Lễ hội & Black Friday)
+          </div>
+        </div>
+
+        <div class="kpi-card" id="card-p4-fc-orders">
+          <div class="kpi-header">
+            <span class="kpi-title">Dự báo Số lượng Đơn hàng Q4</span>
+            <div class="kpi-icon">📦</div>
+          </div>
+          <div class="kpi-value" id="kpi-p4-fc-orders-val">17,900 Đơn</div>
+          <div class="kpi-subtitle">
+            <span class="badge-tag badge-positive">Ước tính tải vận hành đỉnh điểm</span> vào Tháng 11
+          </div>
+        </div>
+
+        <div class="kpi-card alert" id="card-p4-critical">
+          <div class="kpi-header">
+            <span class="kpi-title">Đơn hàng Cần Can thiệp Khẩn cấp</span>
+            <div class="kpi-icon">🚨</div>
+          </div>
+          <div class="kpi-value" id="kpi-p4-critical-val">1,889 Đơn</div>
+          <div class="kpi-subtitle">
+            <span class="badge-tag badge-alert">409 đơn hủy + Đơn trễ > 20 ngày</span>
+          </div>
+        </div>
+
+        <div class="kpi-card accent" id="card-p4-retarget">
+          <div class="kpi-header">
+            <span class="kpi-title">Ngân sách Tiềm năng từ Nhóm VIP</span>
+            <div class="kpi-icon">🎯</div>
+          </div>
+          <div class="kpi-value" id="kpi-p4-retarget-val">$8.12M</div>
+          <div class="kpi-subtitle">
+            <span class="badge-tag badge-warning">5,281 VIP</span> cần kích hoạt Re-engagement
+          </div>
+        </div>
+      </div>
+
+      <!-- Forecast Line Chart with Confidence Interval -->
+      <div class="charts-grid-2col">
+        <div class="chart-box" id="box-p4-forecast">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">📈 AI Forecast: Dự báo Doanh thu & Nhu cầu 3 Tháng Tiếp theo (Q4/2018)</div>
+              <div class="chart-desc">Đường đứt nét: Dự báo | Dải mờ: Khoảng tin cậy 95% (Confidence Interval)</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-p4-forecast"></canvas>
+          </div>
+        </div>
+
+        <!-- Decomposition Tree AI Simulation -->
+        <div class="chart-box" id="box-p4-tree">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">🌳 Decomposition Tree (AI Phân rã Doanh thu)</div>
+              <div class="chart-desc">Bấm chọn từng nút để mở rộng phân tích đa chiều</div>
+            </div>
+          </div>
+          <div class="tree-container" id="decomp-tree">
+            <!-- Node Level 1: Total Revenue -->
+            <div class="tree-column">
+              <div class="tree-col-title">Doanh thu Tổng</div>
+              <div class="tree-node active">
+                <div class="tree-node-title">Total Revenue</div>
+                <div class="tree-node-val">$30.45M</div>
+                <div class="tree-node-bar" style="width: 100%;"></div>
+              </div>
+            </div>
+            <!-- Node Level 2: By State -->
+            <div class="tree-column">
+              <div class="tree-col-title">Theo Bang (Top State)</div>
+              <div class="tree-node active">
+                <div class="tree-node-title">1. SP (São Paulo)</div>
+                <div class="tree-node-val">$12.94M (42.5%)</div>
+                <div class="tree-node-bar" style="width: 100%;"></div>
+              </div>
+              <div class="tree-node">
+                <div class="tree-node-title">2. RJ (Rio de Janeiro)</div>
+                <div class="tree-node-val">$3.85M (12.7%)</div>
+                <div class="tree-node-bar" style="width: 30%;"></div>
+              </div>
+            </div>
+            <!-- Node Level 3: By Category -->
+            <div class="tree-column">
+              <div class="tree-col-title">Theo Ngành hàng</div>
+              <div class="tree-node active">
+                <div class="tree-node-title">toys (Đồ chơi)</div>
+                <div class="tree-node-val">$9.78M</div>
+                <div class="tree-node-bar" style="width: 100%;"></div>
+              </div>
+              <div class="tree-node">
+                <div class="tree-node-title">furniture_decor</div>
+                <div class="tree-node-val">$320K</div>
+                <div class="tree-node-bar" style="width: 15%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actionable Detail Matrix Table -->
+      <div class="chart-box" id="box-p4-action-table">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">🚨 Bảng Tác vụ Khẩn cấp Điều hành (Actionable Detail Matrix Table)</div>
+            <div class="chart-desc">Danh sách đơn hàng trễ hạn > 20 ngày, cước phí vượt trần hoặc bị hủy cần CSKH & Logistics can thiệp</div>
+          </div>
+        </div>
+
+        <div class="action-controls">
+          <input type="text" class="search-input" id="action-search" placeholder="🔍 Tìm kiếm Order ID, Customer ID, Bang..." onkeyup="filterActionTable()">
+          <div style="display: flex; gap: 0.5rem;">
+            <select class="slicer-select" id="action-urgency-filter" onchange="filterActionTable()">
+              <option value="ALL">Tất cả Mức độ Khẩn cấp</option>
+              <option value="HIGH">Cực kỳ Khẩn cấp (HIGH)</option>
+              <option value="MEDIUM">Trung bình (MEDIUM)</option>
+            </select>
+            <button class="btn-export" onclick="exportActionTableToCSV()">
+              <span>📥</span> Xuất Danh sách Tác vụ (CSV)
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="dashboard-table" id="table-action">
+            <thead>
+              <tr>
+                <th>Mã Đơn hàng (Order ID)</th>
+                <th>Khách hàng (Customer ID)</th>
+                <th>Bang</th>
+                <th>Danh mục</th>
+                <th>Doanh thu ($)</th>
+                <th>Phí Ship ($)</th>
+                <th>Tỷ lệ Ship (%)</th>
+                <th>Lead Time (Ngày)</th>
+                <th>Trạng thái</th>
+                <th>Mức khẩn cấp</th>
+                <th>Hành động Đề xuất</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-action">
+              <!-- Injected via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="dashboard-footer" id="main-footer">
+    <p>Báo Cáo Tốt Nghiệp Phân Tích Dữ Liệu Kinh Doanh Thương Mại Điện Tử & Vận Hành Chuỗi Cung Ứng</p>
+    <p style="margin-top: 0.3rem; font-size: 0.75rem; color: #64748B;">Power BI Multi-Page Architecture • Star Schema Modeling • 89,316 Transaction Records</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="dashboard_data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
